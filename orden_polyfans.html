@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Polyfans OT">
+  <title>Orden de Trabajo — Polyfans</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #eef1f7;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    /* ---- TOOLBAR ---- */
+    .toolbar {
+      max-width: 860px;
+      margin: 0 auto 14px;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    .toolbar button {
+      padding: 9px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+      border: none;
+    }
+    .btn-pdf { background: #1a2f6e; color: #fff; }
+    .btn-pdf:hover { background: #142458; }
+    .btn-img { background: #fff; color: #1a2f6e; border: 1px solid #c5cfe8; }
+    .btn-img:hover { background: #f0f3fb; }
+
+    /* ---- CARD ---- */
+    .page {
+      background: #fff;
+      border-radius: 14px;
+      max-width: 860px;
+      margin: 0 auto;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(26,47,110,0.10);
+    }
+
+    /* ---- HEADER ---- */
+    .header {
+      background: #1a2f6e;
+      padding: 22px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .logo-circle {
+      width: 50px; height: 50px;
+      border-radius: 50%;
+      background: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; font-weight: 700; color: #1a2f6e;
+      flex-shrink: 0;
+    }
+    .brand-name { color: #fff; font-size: 20px; font-weight: 600; }
+    .brand-sub { color: rgba(255,255,255,0.6); font-size: 12px; margin-top: 3px; }
+    .header-right { text-align: right; }
+    .header-right p { color: rgba(255,255,255,0.7); font-size: 12px; line-height: 1.9; }
+    .header-right strong { color: #fff; }
+
+    /* ---- BANNER ---- */
+    .doc-banner {
+      background: #f0a030;
+      padding: 9px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .doc-banner span { color: #fff; font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+    .order-num { color: #fff; font-size: 13px; font-weight: 500; }
+
+    /* ---- BODY ---- */
+    .body { padding: 26px 32px; }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .meta-field label {
+      display: block;
+      font-size: 10px;
+      color: #7a8aaa;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 5px;
+    }
+    .meta-field input {
+      width: 100%;
+      border: 1px solid #dde3f0;
+      border-radius: 7px;
+      padding: 8px 10px;
+      font-size: 13px;
+      background: #f7f9fd;
+      color: #1a1a2e;
+      outline: none;
+      font-family: inherit;
+      transition: border-color 0.15s;
+    }
+    .meta-field input:focus { border-color: #1a2f6e; box-shadow: 0 0 0 3px rgba(26,47,110,0.08); }
+    .meta-field input[readonly] { background: #eef1f7; color: #8090aa; cursor: default; }
+
+    /* ---- TABLE ---- */
+    .section-label {
+      font-size: 10px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.7px;
+      color: #8090aa; margin-bottom: 10px;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead tr { background: #1a2f6e; }
+    thead th {
+      color: #fff; padding: 10px 12px;
+      text-align: left; font-weight: 500; font-size: 12px;
+    }
+    thead th.r { text-align: right; }
+    thead th.c { text-align: center; width: 46px; }
+    tbody tr { border-bottom: 1px solid #eef1f7; }
+    tbody tr:hover { background: #f7f9fd; }
+    tbody td { padding: 8px 12px; color: #1a1a2e; vertical-align: middle; }
+    tbody td input {
+      border: none; background: transparent;
+      width: 100%; font-size: 13px; color: #1a1a2e;
+      outline: none; font-family: inherit;
+    }
+    tbody td input:focus {
+      background: #eef1f7; border-radius: 5px; padding: 2px 6px;
+    }
+    td.r { text-align: right; }
+    td.total { text-align: right; font-weight: 600; color: #1a2f6e; }
+    td.center { text-align: center; }
+    .del-btn {
+      background: none; border: none; cursor: pointer;
+      color: #aab; font-size: 14px; padding: 3px 7px;
+      border-radius: 5px; line-height: 1;
+    }
+    .del-btn:hover { background: #fdecea; color: #c0392b; }
+    .add-btn {
+      margin-top: 12px; background: none;
+      border: 1px dashed #c5cfe8; border-radius: 7px;
+      padding: 8px 16px; font-size: 12px; color: #8090aa;
+      cursor: pointer; display: flex; align-items: center; gap: 6px;
+      font-family: inherit; transition: all 0.15s;
+    }
+    .add-btn:hover { border-color: #1a2f6e; color: #1a2f6e; background: #f0f3fb; }
+
+    /* ---- TOTALS ---- */
+    .totals-wrap { margin-top: 24px; display: flex; justify-content: flex-end; }
+    .totals-box {
+      background: #f7f9fd;
+      border: 1px solid #dde3f0;
+      border-radius: 10px;
+      padding: 18px 22px;
+      min-width: 300px;
+    }
+    .tline {
+      display: flex; justify-content: space-between;
+      align-items: center; padding: 5px 0; font-size: 13px;
+    }
+    .tline .lbl { color: #7a8aaa; }
+    .tline .val { font-weight: 600; color: #1a1a2e; }
+    .tline.senia .val { color: #c87020; }
+    .tline.grand {
+      border-top: 2px solid #1a2f6e;
+      margin-top: 10px; padding-top: 12px;
+    }
+    .tline.grand .lbl { font-size: 14px; font-weight: 600; color: #1a1a2e; }
+    .tline.grand .val { font-size: 22px; color: #1a2f6e; }
+    .seña-input {
+      border: 1px solid #dde3f0; border-radius: 6px;
+      padding: 4px 8px; font-size: 13px; background: #fff;
+      color: #c87020; width: 110px; text-align: right;
+      outline: none; font-family: inherit;
+    }
+    .seña-input:focus { border-color: #f0a030; box-shadow: 0 0 0 2px rgba(240,160,48,0.15); }
+    .payment-note {
+      margin-top: 12px; padding-top: 10px;
+      border-top: 1px solid #dde3f0;
+      font-size: 11px; color: #8090aa; line-height: 1.6;
+    }
+    .payment-note strong { color: #1a1a2e; }
+
+    /* ---- FOOTER ---- */
+    .page-footer {
+      background: #f7f9fd; border-top: 1px solid #eef1f7;
+      padding: 12px 32px; text-align: center;
+      font-size: 11px; color: #aab;
+    }
+
+    /* ---- RESPONSIVE ---- */
+    @media (max-width: 600px) {
+      body { padding: 10px; }
+      .header { padding: 16px 18px; }
+      .body { padding: 18px 16px; }
+      .doc-banner { padding: 8px 18px; }
+      .meta-grid { grid-template-columns: 1fr 1fr; }
+      .meta-grid .meta-field:last-child { grid-column: span 2; }
+      .totals-box { min-width: unset; width: 100%; }
+      .totals-wrap { justify-content: stretch; }
+      .toolbar { justify-content: stretch; }
+      .toolbar button { flex: 1; }
+      thead th.c, tbody td.center { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="toolbar">
+    <button class="btn-img" id="guardarIMG">📷 Guardar imagen</button>
+    <button class="btn-pdf" id="guardarPDF">⬇ Descargar PDF</button>
+  </div>
+
+  <div class="page" id="orden">
+    <!-- HEADER -->
+    <div class="header">
+      <div class="brand">
+        <div class="logo-circle">PF</div>
+        <div>
+          <div class="brand-name">Polyfans</div>
+          <div class="brand-sub">San Francisco 483 · 011 6678-1429</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <p><strong>Transferencias</strong></p>
+        <p>Alias: Polyfans.bk</p>
+        <p>Nelson Emmanuel Longone</p>
+      </div>
+    </div>
+
+    <!-- BANNER -->
+    <div class="doc-banner">
+      <span>Orden de Trabajo</span>
+      <div class="order-num">N° <span id="numeroOrden">—</span></div>
+    </div>
+
+    <!-- BODY -->
+    <div class="body">
+      <div class="meta-grid">
+        <div class="meta-field">
+          <label>Cliente</label>
+          <input type="text" id="cliente" placeholder="Nombre del cliente">
+        </div>
+        <div class="meta-field">
+          <label>Teléfono</label>
+          <input type="text" id="telefono" placeholder="Número de contacto">
+        </div>
+        <div class="meta-field">
+          <label>Fecha</label>
+          <input type="text" id="fecha" readonly>
+        </div>
+      </div>
+
+      <div class="section-label">Detalle de trabajos / productos</div>
+      <table id="tablaItems">
+        <thead>
+          <tr>
+            <th style="width:36px">#</th>
+            <th>Descripción</th>
+            <th class="r" style="width:120px">Valor</th>
+            <th class="r" style="width:110px">Total</th>
+            <th class="c">—</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <button class="add-btn" id="btnAgregar" onclick="agregarItem()">+ Agregar ítem</button>
+
+      <div class="totals-wrap">
+        <div class="totals-box">
+          <div class="tline">
+            <span class="lbl">Subtotal</span>
+            <span class="val">$<span id="subtotal">0.00</span></span>
+          </div>
+          <div class="tline senia">
+            <span class="lbl">Seña / anticipo</span>
+            <span class="val">− $<input class="seña-input" id="senia" type="number" min="0" step="0.01" placeholder="0.00" value="0"></span>
+          </div>
+          <div class="tline grand">
+            <span class="lbl">Saldo pendiente</span>
+            <span class="val">$<span id="saldo">0.00</span></span>
+          </div>
+          <div class="payment-note">
+            Aceptamos <strong>efectivo</strong> o <strong>transferencia</strong><br>
+            Alias: <strong>Polyfans.bk</strong> — Nelson Emmanuel Longone
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-footer">Polyfans · San Francisco 483 · 011 6678-1429</div>
+  </div>
+
+  <!-- Librerías -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <script>
+    // Fecha y número de orden
+    const fechaActual = new Date();
+    document.getElementById("fecha").value = fechaActual.toLocaleDateString("es-AR", {day:"2-digit", month:"2-digit", year:"numeric"});
+
+    let n = localStorage.getItem("contadorOrden");
+    n = n ? parseInt(n) + 1 : 1;
+    localStorage.setItem("contadorOrden", n);
+    document.getElementById("numeroOrden").textContent = String(n).padStart(4, "0");
+
+    document.getElementById("senia").addEventListener("input", actualizarTotales);
+
+    function agregarItem() {
+      const tbody = document.querySelector("#tablaItems tbody");
+      const idx = tbody.rows.length + 1;
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td style="color:#aab;font-size:12px">${idx}</td>
+        <td><input type="text" placeholder="Describí el producto o servicio"></td>
+        <td class="r"><input type="number" placeholder="0.00" min="0" step="0.01" style="text-align:right;width:100px"></td>
+        <td class="total">$0.00</td>
+        <td class="center"><button class="del-btn" title="Eliminar">✕</button></td>`;
+      tbody.appendChild(tr);
+      tr.querySelector(".del-btn").addEventListener("click", () => { tr.remove(); actualizarTotales(); renumerarFilas(); });
+      tr.querySelectorAll("input").forEach(i => i.addEventListener("input", actualizarTotales));
+      actualizarTotales();
+    }
+
+    function renumerarFilas() {
+      document.querySelectorAll("#tablaItems tbody tr").forEach((tr, i) => { tr.cells[0].textContent = i + 1; });
+    }
+
+    function actualizarTotales() {
+      let sub = 0;
+      document.querySelectorAll("#tablaItems tbody tr").forEach(tr => {
+        const v = parseFloat(tr.cells[2].querySelector("input").value) || 0;
+        tr.cells[3].textContent = "$" + v.toFixed(2);
+        sub += v;
+      });
+      const senia = parseFloat(document.getElementById("senia").value) || 0;
+      document.getElementById("subtotal").textContent = sub.toFixed(2);
+      document.getElementById("saldo").textContent = Math.max(0, sub - senia).toFixed(2);
+    }
+
+    function ocultarExtras() {
+      document.querySelectorAll(".del-btn, #btnAgregar, .toolbar").forEach(el => el.style.display = "none");
+      document.querySelectorAll("thead th:last-child, tbody td:last-child").forEach(el => el.style.display = "none");
+    }
+    function mostrarExtras() {
+      document.querySelectorAll(".del-btn, #btnAgregar, .toolbar").forEach(el => el.style.display = "");
+      document.querySelectorAll("thead th:last-child, tbody td:last-child").forEach(el => el.style.display = "");
+    }
+
+    document.getElementById("guardarPDF").addEventListener("click", async () => {
+      ocultarExtras();
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF("p", "pt", "a4");
+      const canvas = await html2canvas(document.getElementById("orden"), { scale: 3, useCORS: true });
+      const img = canvas.toDataURL("image/png", 1.0);
+      const w = doc.internal.pageSize.getWidth();
+      const h = (canvas.height * w) / canvas.width;
+      doc.addImage(img, "PNG", 0, 0, w, h);
+      const cli = (document.getElementById("cliente").value || "sin_cliente").replace(/\s+/g, "_");
+      const fecha = fechaActual.toISOString().slice(0, 10);
+      doc.save(`orden_${String(n).padStart(4,"0")}_${cli}_${fecha}.pdf`);
+      mostrarExtras();
+    });
+
+    document.getElementById("guardarIMG").addEventListener("click", async () => {
+      ocultarExtras();
+      const orden = document.getElementById("orden");
+      const inputs = orden.querySelectorAll("input");
+      const remap = [];
+      inputs.forEach(inp => {
+        const sp = document.createElement("span");
+        sp.textContent = (inp.value && inp.value !== "0") ? inp.value : inp.placeholder;
+        sp.style.cssText = "border-bottom:1px solid #dde3f0;padding:2px 4px;display:inline-block;min-width:60px;font-size:13px";
+        inp.parentNode.replaceChild(sp, inp);
+        remap.push({ sp, inp });
+      });
+      const canvas = await html2canvas(orden, { scale: 3, scrollY: -window.scrollY, useCORS: true });
+      const cli = (document.getElementById("cliente")?.value || remap.find(r => r.inp.id === "cliente")?.sp.textContent || "sin_cliente").replace(/\s+/g, "_");
+      const link = document.createElement("a");
+      link.download = `orden_${String(n).padStart(4,"0")}_${cli}.png`;
+      link.href = canvas.toDataURL("image/png", 1.0);
+      link.click();
+      remap.forEach(({ sp, inp }) => sp.parentNode.replaceChild(inp, sp));
+      mostrarExtras();
+    });
+
+    agregarItem();
+  </script>
+</body>
+</html>
